@@ -22,14 +22,10 @@ extern "C" {
 #include <string.h> // for memset
 }
 
-#if ARDUINO > 22
-#include <Arduino.h> 
-#else
-#include <WProgram.h> 
-#endif
+
 
 #include "TimeAlarms.h"
-#include "Time.h"
+//#include "Time.h"
 
 #define IS_ONESHOT  true   // constants used in arguments to create method
 #define IS_REPEAT   false 

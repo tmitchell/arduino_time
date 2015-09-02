@@ -3,9 +3,58 @@
 #ifndef TimeAlarms_h
 #define TimeAlarms_h
 
-#include <inttypes.h>
+#include "application.h"
+//#include <inttypes.h>
 
-#include "Time.h"
+//#include "Time.h"
+
+//---------------------------------
+
+extern time_t time_zone_cache;  // from spark_wiring_time.cpp
+#define now() (Time.now()+time_zone_cache)
+
+#define timeDayOfWeek_t int
+/* Useful Constants */
+#define SECS_PER_MIN  (60UL)
+#define SECS_PER_HOUR (3600UL)
+#define SECS_PER_DAY  (SECS_PER_HOUR * 24UL)
+#define DAYS_PER_WEEK (7UL)
+#define SECS_PER_WEEK (SECS_PER_DAY * DAYS_PER_WEEK)
+#define SECS_PER_YEAR (SECS_PER_WEEK * 52UL)
+#define SECS_YR_2000  (946684800UL) // the time at the start of y2k
+ 
+/* Useful Macros for getting elapsed time */
+#define numberOfSeconds(_time_) (_time_ % SECS_PER_MIN)  
+#define numberOfMinutes(_time_) ((_time_ / SECS_PER_MIN) % SECS_PER_MIN) 
+#define numberOfHours(_time_) (( _time_% SECS_PER_DAY) / SECS_PER_HOUR)
+#define dayOfWeek(_time_)  ((( _time_ / SECS_PER_DAY + 4)  % DAYS_PER_WEEK)+1) // 1 = Sunday
+#define elapsedDays(_time_) ( _time_ / SECS_PER_DAY)  // this is number of days since Jan 1 1970
+#define elapsedSecsToday(_time_)  (_time_ % SECS_PER_DAY)   // the number of seconds since last midnight 
+// The following macros are used in calculating alarms and assume the clock is set to a date later than Jan 1 1971
+// Always set the correct time before settting alarms
+#define previousMidnight(_time_) (( _time_ / SECS_PER_DAY) * SECS_PER_DAY)  // time at the start of the given day
+#define nextMidnight(_time_) ( previousMidnight(_time_)  + SECS_PER_DAY )   // time at the end of the given day 
+#define elapsedSecsThisWeek(_time_)  (elapsedSecsToday(_time_) +  ((dayOfWeek(_time_)-1) * SECS_PER_DAY) )   // note that week starts on day 1
+#define previousSunday(_time_)  (_time_ - elapsedSecsThisWeek(_time_))      // time at the start of the week for the given time
+#define nextSunday(_time_) ( previousSunday(_time_)+SECS_PER_WEEK)          // time at the end of the week for the given time
+
+
+/* Useful Macros for converting elapsed time to a time_t */
+#define minutesToTime_t ((M)) ( (M) * SECS_PER_MIN)  
+#define hoursToTime_t   ((H)) ( (H) * SECS_PER_HOUR)  
+#define daysToTime_t    ((D)) ( (D) * SECS_PER_DAY) // fixed on Jul 22 2011
+#define weeksToTime_t   ((W)) ( (W) * SECS_PER_WEEK)   
+
+#define dowSunday 1
+#define dowMonday 2
+#define dowTuesday 3
+#define dowWednesday 4
+#define dowThursday 5
+#define dowFriday 6
+#define dowSaturday 7
+
+
+//-------------------------------------
 
 #define dtNBR_ALARMS 6   // max is 255
 
@@ -14,11 +63,14 @@
 typedef enum { dtMillisecond, dtSecond, dtMinute, dtHour, dtDay } dtUnits_t;
 
 typedef struct  {
+
 	uint8_t alarmType              :4 ;  // enumeration of daily/weekly (in future: biweekly/semimonthly/monthly/annual)
 	                                     // note that the current API only supports daily or weekly alarm periods
+
     uint8_t isEnabled              :1 ;  // the timer is only actioned if isEnabled is true 
     uint8_t isOneShot              :1 ;  // the timer will be de-allocated after trigger is processed 
 										 }
+
     AlarmMode_t   ;
 	
 // new time based alarms should be added just before dtLastAlarmType
@@ -39,7 +91,7 @@ typedef void (*OnTick_t)();  // alarm callback function typedef
 // class defining an alarm instance, only used by dtAlarmsClass
 class AlarmClass
 {  
-private:
+private: 
 
 public:
   AlarmClass(); 
@@ -111,6 +163,7 @@ extern TimeAlarmsClass Alarm;  // make an instance for the user
  * MACROS
  *============================================================================*/
 
+
 /* public */
 #define waitUntilThisSecond(_val_) waitForDigits( _val_, dtSecond)
 #define waitUntilThisMinute(_val_) waitForDigits( _val_, dtMinute)
@@ -124,4 +177,3 @@ extern TimeAlarmsClass Alarm;  // make an instance for the user
 
 
 #endif /* TimeAlarms_h */
-

@@ -1,3 +1,6 @@
+// This #include statement was automatically added by the Spark IDE.
+#include "TimeAlarms.h"
+
 /*
  * TimeAlarmExample.pde
  *
@@ -11,18 +14,17 @@
  * At startup the time is set to Jan 1 2011  8:29 am
  */
  
-#include <Time.h>
-#include <TimeAlarms.h>
+
+#include "TimeAlarms.h"
 
 void setup()
 {
+  Time.zone(-4);
   Serial.begin(9600);
-  setTime(8,29,0,1,1,11); // set time to Saturday 8:29:00am Jan 1 2011
   // create the alarms 
   Alarm.alarmRepeat(8,30,0, MorningAlarm);  // 8:30am every day
-  Alarm.alarmRepeat(17,45,0,EveningAlarm);  // 5:45pm every day 
+  Alarm.alarmRepeat(17,45,10,EveningAlarm);  // 5:45pm every day 
   Alarm.alarmRepeat(dowSaturday,8,30,30,WeeklyAlarm);  // 8:30:30 every Saturday 
-
  
   Alarm.timerRepeat(15, Repeats);            // timer for every 15 seconds    
   Alarm.timerOnce(10, OnceOnly);             // called once after 10 seconds 
@@ -61,9 +63,9 @@ void OnceOnly(){
 void digitalClockDisplay()
 {
   // digital clock display of the time
-  Serial.print(hour());
-  printDigits(minute());
-  printDigits(second());
+  Serial.print(Time.hour());
+  printDigits(Time.minute());
+  printDigits(Time.second());
   Serial.println(); 
 }
 
@@ -74,4 +76,5 @@ void printDigits(int digits)
     Serial.print('0');
   Serial.print(digits);
 }
+
 
